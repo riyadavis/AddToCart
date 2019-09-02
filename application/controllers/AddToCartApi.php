@@ -28,5 +28,14 @@ class AddToCartApi extends CI_Controller {
 	{
 		$data = $this->AddToCartDatabase->addCart();
 		echo json_encode($data);
+		// echo $data;
 	}
+
+	public function c()
+	{
+		
+		$data = $this->AddToCartDatabase->c();
+		echo json_encode($data);
+	}
+	
 }

@@ -26,6 +26,8 @@
 
         var product = document.getElementById('product');
         var pimage = document.getElementById('pimage');
+        // var productArray = new Array();
+        // i=0;
 
         async function InsertProduct()
         {
@@ -35,6 +37,11 @@
             response.map(r=>{
                 var nam = document.createElement('input');
                     nam.value = r.product_name;
+                    nam.id = "nam";
+                    nam.name = "nam";
+                    
+                    // productArray[i]=r.product_name;
+                    // i++;
                 var image = document.createElement('img');
                     image.src = "<?php echo base_url().'assets/img/'?>"+r.product_image;
                     image.setAttribute("height","80px");
@@ -45,10 +52,11 @@
                     // button.id = r.id;
                     button.value = "Add To Cart";
                 var quantity = document.createElement('input');
-                    quantity.type = "text";
+                    quantity.type = "number";
                     quantity.placeholder = "quantity";
                     quantity.name = "quantity";
                     quantity.id = "quantity";
+                    quantity.value = 1;
                 var pid = document.createElement('input');
                     pid.value = r.id;
                     pid.id = "pid";
@@ -68,6 +76,7 @@
                         form.append('pid',pid.value);
                         form.append('quantity',quantity.value);
                         // console.log(pid.value);
+                        // form.append('nam',nam.value);
                         let request = await fetch(url,{
                             method: 'post',
                             body:form
