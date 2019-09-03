@@ -71,7 +71,7 @@
                 
                 button.onclick = async function(){
         
-                        let url = "<?php echo site_url('AddToCartApi/addCart'); ?>";
+                        let url = "<?php echo site_url('AddToCartApi/addCart'); ?>?q=1";
                         let form = new FormData();
                         form.append('pid',pid.value);
                         form.append('quantity',quantity.value);
