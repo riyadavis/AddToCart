@@ -18,103 +18,92 @@ class AddToCartDatabase extends CI_Model
         // $this->session->set_userdata('userid',1);
         //given source id as 1
         // $iduser = $this->session->userdata('userid');
-        // $source_id = 1;
-        // $data = array();
-        $iduser = $_GET['q'];
-        
-        
-        // if($this->session->has_userdata('userid'))
-        // {
+        $source_id = 1;
+        // $iduser = $_GET['q'];
+         
+        $iduser = 1; 
+        $this->db->query("select * from customer where id = '$iduser'")->result_array();
+        if($this->db->affected_rows()>0)
+        {
             $items = $this->db->query("select items_added from cart_table where customer_id = '$iduser'")->result_array();
             
             //if customer id and shop id already exists
             if($this->db->affected_rows()>0)
             {
                 //if the items_added is null
-                if($items[0]['items_added'] == null)
-                {
-                    $insert = array('id'=>$this->input->post('pid'),
-                                'quantity'=> $this->input->post('quantity'));
+                // if($items[0]['items_added'] == null)
+                // {
+                    // $insert = array('id'=>$this->input->post('pid'),
+                    //             'quantity'=> $this->input->post('quantity'));
+                    $insert = json_decode(file_get_contents("php://input"), true);
                     $this->db->where('customer_id',$iduser);
                     $this->db->where('source_id',$source_id);
                     $this->db->set('items_added',json_encode($insert));
                     $this->db->set('time_stamp',Date('Y-m-d h:i:s'));
                     $this->db->update('cart_table');
                     return "item inserted"; 
-                }
-                else
-                {
-                    $countItems = count(preg_split('/,(?![^{]*})/', $items[0]['items_added']));
+                // }
+                // else
+                // {
+
+                    // $countItems = count(preg_split('/,(?![^{]*})/', $items[0]['items_added']));
    
-                    if($countItems > 1)
-                    {
+                    // if($countItems > 1)
+                    // {
                     
-                        $insert = json_decode($items[0]['items_added'],true);
-                        $pid = $this->input->post('pid');
-                        // if($insert[0]['id'] == $pid)
-                        // {
-                        //     return 
-                        // }
-                        $insertItem = array('id'=>$this->input->post('pid'),
-                                'quantity'=> $this->input->post('quantity'));
-                        array_push($insert,$insertItem);
-                        $this->db->where('customer_id',$iduser);
-                        // $this->db->where('source_id',$source_id);
-                        $this->db->set('items_added',json_encode($insert));
-                        $this->db->set('time_stamp',Date('Y-m-d h:i:s'));
-                        $this->db->update('cart_table');
-                        return "cart more than 1 item updated";
-                    }
-                    else
-                    {
-                        $insert[] = array('id'=>$this->input->post('pid'),
-                                'quantity'=> $this->input->post('quantity'));
-                        $insert[] = json_decode($items[0]['items_added'],true);
-                        $this->db->where('customer_id',$iduser);
-                        $this->db->where('source_id',$source_id);
-                        $this->db->set('items_added',json_encode($insert));
-                        $this->db->set('time_stamp',Date('Y-m-d h:i:s'));
-                        $this->db->update('cart_table');
-                        return "cart updated";
-                    }
+                    //     $insert = json_decode($items[0]['items_added'],true);
+                    //     $pid = $this->input->post('pid');
+                        
+                    //     $insertItem = array('id'=>$this->input->post('pid'),
+                    //             'quantity'=> $this->input->post('quantity'));
+                    //     array_push($insert,$insertItem);
+                    //     $this->db->where('customer_id',$iduser);
+                    //     // $this->db->where('source_id',$source_id);
+                    //     $this->db->set('items_added',json_encode($insert));
+                    //     $this->db->set('time_stamp',Date('Y-m-d h:i:s'));
+                    //     $this->db->update('cart_table');
+                    //     return "cart more than 1 item updated";
+                    // }
+                    // else
+                    // {
+                        
+                    //     $insert[] = array('id'=>$this->input->post('pid'),
+                    //                     'quantity'=> $this->input->post('quantity'));
+                    //     $insert[] = json_decode($items[0]['items_added'],true);
+                    //     $this->db->where('customer_id',$iduser);
+                    //     $this->db->where('source_id',$source_id);
+                    //     $this->db->set('items_added',json_encode($insert));
+                    //     $this->db->set('time_stamp',Date('Y-m-d h:i:s'));
+                    //     $this->db->update('cart_table');
+                    //     return "cart updated";
+                    // }
                     
-                   
-                   
-                    // array_push($insert,$insert2);
-                    // return json_decode($insert);
-                    // $cartCount = count((array)$insert);
-                    
-                    //         $this->db->where('customer_id',$iduser);
-                    // $this->db->where('source_id',$source_id);
-                    // $this->db->set('items_added',json_encode($insert));
-                    // $this->db->set('time_stamp',Date('Y-m-d h:i:s'));
-                    // $this->db->update('cart_table');
-                    // return "cart updated";
                 }               
                 
-            }
-            else
-            {
-                $array = array('id'=>$this->input->post('pid'),
-                                'quantity'=>$this->input->post('quantity'));
-                $jsonArray = json_encode($array);
-                $addCart = array('customer_id'=>$this->session->userdata('userid'),
-                                'items_added'=>$jsonArray,
-                                'source_id'=>$source_id,
-                                'time_stamp'=>Date('Y-m-d h:i:s'));
-                $this->db->insert('cart_table',$addCart);
+                
+                else
+                {
+                    // $array = array('id'=>$this->input->post('pid'),
+                    //                 'quantity'=>$this->input->post('quantity'));
+                    // $jsonArray = json_encode($array);
+                    $jsonArray = json_decode(file_get_contents("php://input"), true);
+                    $addCart = array('customer_id'=>$this->session->userdata('userid'),
+                                    'items_added'=>json_encode($jsonArray),
+                                    'source_id'=>$source_id,
+                                    'time_stamp'=>Date('Y-m-d h:i:s'));
+                    $this->db->insert('cart_table',$addCart);
 
-                return "success";
-            }
+                    return "success";
+                }
             
             
             
             // return $jsonArray;
-        // }
-        // else
-        // {
-            // return "error";
-        // }
+        }
+        else
+        {
+            return "no user";
+        }
         // return $addCart;
     }
 
