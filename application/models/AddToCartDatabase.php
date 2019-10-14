@@ -4,6 +4,27 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 class AddToCartDatabase extends CI_Model
 {
 
+    public function SaltData()
+    {
+        $salt = 'adastratechnologies';
+        $hash = sha1($salt.'adastra');
+        $this->session->set_userdata('userauth',$hash);
+        if(isset($_GET['q']))
+        {
+            $mobno = $_GET['q'];
+            $pw_hash = sha1($salt.$mobno);
+            $matchData = $this->db->query("select * from api_table where MATCH(salt) AGAINST('$pw_hash' IN NATURAL LANGUAGE MODE)")->result_array(); 
+            if($this->db->affected_rows()>0)
+            {
+                $this->session->set_userdata('userauth',$pw_hash);
+                return 0;
+            }
+        }
+        return 0;
+        // return $pw_hash;
+        // return $iduser;
+    }
+
     public function insertProduct()
     {
         $insertProduct = $this->db->query("select * from product")->result_array();
@@ -36,12 +57,22 @@ class AddToCartDatabase extends CI_Model
                     // $insert = array('id'=>$this->input->post('pid'),
                     //             'quantity'=> $this->input->post('quantity'));
                     $insert = json_decode(file_get_contents("php://input"), true);
-                    $this->db->where('customer_id',$iduser);
-                    $this->db->where('source_id',$source_id);
-                    $this->db->set('items_added',json_encode($insert));
-                    $this->db->set('time_stamp',Date('Y-m-d h:i:s'));
-                    $this->db->update('cart_table');
-                    return "item inserted"; 
+                    $this->db->trans_start();
+                        $this->db->where('customer_id',$iduser);
+                        $this->db->where('source_id',$source_id);
+                        $this->db->set('items_added',json_encode($insert));
+                        $this->db->set('time_stamp',Date('Y-m-d h:i:s'));
+                        $this->db->update('cart_table');
+                    $this->db->trans_complete();
+                    if($this->db->trans_status() === TRUE)
+                    {
+                        return "item inserted";
+                    }
+                    else
+                    {
+                        return "error";
+                    }
+                     
                 // }
                 // else
                 // {
@@ -91,8 +122,9 @@ class AddToCartDatabase extends CI_Model
                                     'items_added'=>json_encode($jsonArray),
                                     'source_id'=>$source_id,
                                     'time_stamp'=>Date('Y-m-d h:i:s'));
-                    $this->db->insert('cart_table',$addCart);
-
+                    $this->db->trans_start();
+                        $this->db->insert('cart_table',$addCart);
+                    $this->db->trans_complete();
                     return "success";
                 }
             
@@ -102,7 +134,7 @@ class AddToCartDatabase extends CI_Model
         }
         else
         {
-            return "no user";
+            return "invalid user";
         }
         // return $addCart;
     }
@@ -111,6 +143,18 @@ class AddToCartDatabase extends CI_Model
     public function c()
     {
         $iduser = 1;
+        $mobno = $this->db->query("select customer_mobile from customer where id = '$iduser' ")->row()->customer_mobile;
+        
+        return $mobno;
+        // $password = 'abcdefg';
+        $salt = 'adastratechnologies';
+        $pw_hash = sha1($salt.$mobno);
+        $insert = array('salt'=>$pw_hash);
+        $this->db->where('id',$iduser);
+        $this->db->update('api_table',$insert);
+        // $this->db->insert('api_table',$insert);
+        
+        return $pw_hash;
         $source_id = 1;
         // $insert[] = array('id'=>1,'quantity'=> 3);
         $insert2 = array('id'=>1,'quantity'=> 3);
